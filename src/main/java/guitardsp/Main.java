@@ -1,7 +1,10 @@
 package guitardsp;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.stage.Stage;
+import javafx.scene.Scene;
 
 import guitardsp.audio.AudioEngine;
 import guitardsp.dsp.Pedalboard;
@@ -11,6 +14,14 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/guitardsp/ui/MainView.fxml"));
+            stage.setScene(new Scene(root));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
 
         // Temporary UI until you build MainView
         stage.setTitle("Guitar DSP Pedalboard");

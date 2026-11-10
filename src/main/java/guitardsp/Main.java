@@ -9,41 +9,35 @@ import javafx.scene.Scene;
 import guitardsp.audio.AudioEngine;
 import guitardsp.dsp.Pedalboard;
 import guitardsp.effects.DistortionEffect;
+import guitardsp.ui.controller.MainController;
 
 public class Main extends Application {
+    private AudioEngine engine;
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws Exception {
+        // Build pedalboard and audio engine
+        Pedalboard board = new Pedalboard();
+        board.addEffect(new DistortionEffect()); // first effect
+        engine = new AudioEngine(board);
 
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/guitardsp/ui/MainView.fxml"));
-            stage.setScene(new Scene(root));
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        // Load the UI and give the controller the engine
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/guitardsp/ui/MainView.fxml"));
+        Parent root = loader.load();
+        MainController controller = loader.getController();
+        controller.setEngine(engine);
+        controller.setPedalboard(board);
 
-
-        // Temporary UI until you build MainView
+        stage.setScene(new Scene(root));
         stage.setTitle("Guitar DSP Pedalboard");
         stage.show();
 
-        // Build pedalboard
-        Pedalboard board = new Pedalboard();
-        board.addEffect(new DistortionEffect()); // first effect
+        engine.startAsync();
+    }
 
-        // Start audio engine on background thread
-        AudioEngine engine = new AudioEngine(board);
-
-        Thread audioThread = new Thread(() -> {
-            try {
-                engine.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-        audioThread.setDaemon(true); // stops when app closes
-        audioThread.start();
+    @Override
+    public void stop() {
+        engine.stop();
     }
 
     public static void main(String[] args) {
